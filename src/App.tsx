@@ -10,7 +10,9 @@ import { focusTheme, breakTheme } from './MuiCustom';
 import { formatTime, toSeconds } from './formatter';
 import { useAppSelector } from './hook';
 import { createTheme } from '@mui/material';
+import { Time } from './types';
 
+// this good
 const focusSettings = {
   chipName: 'Focus',
   time: {
@@ -29,17 +31,28 @@ const breakSettings = {
   theme: breakTheme,
 };
 
-const settings = [focusSettings, breakSettings, focusSettings, breakSettings, focusSettings];
+// this temporary good
+const tmpPhaseCircles = [focusSettings, breakSettings, focusSettings, breakSettings, focusSettings];
+
+const phaseCircles = new Map(tmpPhaseCircles.map((phase, index) => [index, phase]));
+
+enum PhaseStatus {
+  FOCUS = 0,
+  BREAK = 1,
+}
 
 function App() {
   const { mode, focusLength, breakLength } = useAppSelector((state) => state.theme);
-  const [timer, setTimer] = useState({ ...settings[0].time });
-  const [isPause, setIsPause] = useState<boolean>(true);
-  const [phase, setPhase] = useState(0);
-  const formatedTime = useMemo(() => formatTime(timer), [timer]);
-  const theme = useMemo(() => createTheme(settings[phase].theme(mode)), [mode, phase]);
 
-  console.log(focusLength);
+  const [timer, setTimer] = useState<Time>({ ...focusSettings.time });
+  const [breakValue, setBreakValue] = useState('01:00');
+  const [focusValue, setFocusValue] = useState('01:00');
+
+  const [isPause, setIsPause] = useState<boolean>(true);
+  const [phase, setPhase] = useState<PhaseStatus | number>(PhaseStatus.FOCUS);
+
+  const theme = useMemo(() => createTheme(phaseCircles.get(phase)?.theme(mode)), [mode, phase]);
+  const formattedTime = useMemo(() => formatTime(timer), [timer]);
 
   useEffect(() => {
     breakSettings.time = { ...breakLength };
@@ -49,8 +62,20 @@ function App() {
     focusSettings.time = { ...focusLength };
   }, [focusLength]);
 
-  // console.log(timer, `phase = ${phase}`);
-  console.log(focusLength);
+  function toNextPhase() {
+    const currentPhase = phase + 1;
+    if (phaseCircles.size <= currentPhase) {
+      setTimer({ ...focusSettings.time });
+      setPhase(PhaseStatus.FOCUS);
+      setIsPause(true);
+      return;
+    }
+    setPhase(currentPhase);
+    setTimer({
+      minutes: phaseCircles.get(currentPhase)?.time.minutes as number,
+      seconds: phaseCircles.get(currentPhase)?.time.seconds as number,
+    });
+  }
 
   useEffect(() => {
     let time = toSeconds(timer.minutes, timer.seconds);
@@ -73,21 +98,6 @@ function App() {
 
   function timerHandler() {
     setIsPause((prevState) => !prevState);
-  }
-
-  function toNextPhase() {
-    const currentPhase = phase + 1;
-    if (settings.length <= currentPhase) {
-      setTimer({ ...settings[0].time });
-      setPhase(0);
-      setIsPause(true);
-      return;
-    }
-    setPhase(currentPhase);
-    setTimer({
-      minutes: settings[currentPhase].time.minutes,
-      seconds: settings[currentPhase].time.seconds,
-    });
   }
 
   const chipStyles = {
@@ -157,20 +167,27 @@ function App() {
             <div className="container">
               <Chip
                 icon={<FocusIcon fill={theme.palette.text.primary} sx={{ width: '30px', height: '26px' }} />}
-                label={settings[phase].chipName}
+                label={phaseCircles.get(phase)?.chipName}
                 variant="outlined"
                 sx={chipStyles}
               />
               <Box sx={timerStyles}>
                 <Typography component="div" sx={timeNumbers}>
-                  {formatedTime.minutes}
+                  {formattedTime.minutes}
                 </Typography>
                 <Typography component="div" sx={timeNumbers}>
-                  {formatedTime.seconds}
+                  {formattedTime.seconds}
                 </Typography>
               </Box>
               <Box className="pomodoro__nav" sx={pomodoroNav}>
-                <SettingsModal theme={theme} />
+                <SettingsModal
+                  breakValue={breakValue}
+                  focusValue={focusValue}
+                  setFocusValue={setFocusValue}
+                  setBreakValue={setBreakValue}
+                  setHzChto={setTimer}
+                  theme={theme}
+                />
                 <Button variant="contained" color="primary" sx={bigBttn} onClick={() => timerHandler()}>
                   {isPause ? (
                     <StartIcon

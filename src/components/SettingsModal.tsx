@@ -1,12 +1,12 @@
 import { Box, Button, TextField, Typography } from '@mui/material';
-import React, { useState, useEffect, FC } from 'react';
+import React, { useState, useEffect, FC, Dispatch, SetStateAction } from 'react';
 import Modal from '@mui/material/Modal';
 import DotesIcon from '../UI/Icons/DotesIcon';
 import CloseIcon from '@mui/icons-material/Close';
 import { IconButton } from '@mui/material';
 import ControlledSwitch from './ControlledSwitch'; // https://mui.com/material-ui/react-switch/
 import SettingsInput from './SettingsInput';
-import { useAppDispatch } from './../hook';
+import { useAppDispatch } from '../hook';
 import { setTheme, setFocusLength, setBreakLength } from '../features/themeSlice';
 import { Theme } from '@mui/material/styles';
 import InputMask from 'react-input-mask';
@@ -14,36 +14,38 @@ import { Time } from '../types';
 
 interface ModalProps {
   theme: Theme;
+  focusValue: string;
+  breakValue: string;
+  setFocusValue: Dispatch<SetStateAction<string>>;
+  setBreakValue: Dispatch<SetStateAction<string>>;
+  setHzChto: Dispatch<SetStateAction<Time>>;
 }
 
-const SettingsModal: FC<ModalProps> = ({ theme }) => {
+const SettingsModal: FC<ModalProps> = ({ theme, focusValue, breakValue, setFocusValue, setBreakValue, setHzChto }) => {
   const dispatch = useAppDispatch();
   const [checked, setChecked] = useState(true);
-  const [focusTime, setFocusTime] = useState('01:00');
-
-  const [breakTime, setBreakTime] = useState('01:00');
-
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   useEffect(() => {
     dispatch(setTheme(checked ? 'light' : 'dark'));
   }, [checked]);
 
-  const focusHanlder = (e: any) => {
-    // any!!!
-    setFocusTime(e.target.value);
+  const focusHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFocusValue(e.target.value);
     const time: Time = {
       minutes: +e.target.value.split(':')[0],
       seconds: +e.target.value.split(':')[1],
     };
+    setHzChto({ ...time });
     dispatch(setFocusLength({ ...time }));
   };
 
-  const breakHanlder = (e: any) => {
-    // any!!!
-    setBreakTime(e.target.value);
+  const breakHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBreakValue(e.target.value);
     const time: Time = {
       minutes: +e.target.value.split(':')[0],
       seconds: +e.target.value.split(':')[1],
@@ -97,10 +99,10 @@ const SettingsModal: FC<ModalProps> = ({ theme }) => {
             </Typography>
             <InputMask
               mask="99:99"
-              value={focusTime}
+              value={focusValue}
               disabled={false}
-              maskPlaceholder={focusTime}
-              onChange={focusHanlder}
+              maskPlaceholder={focusValue}
+              onChange={focusHandler}
             >
               <TextField variant="filled" />
             </InputMask>
@@ -112,10 +114,10 @@ const SettingsModal: FC<ModalProps> = ({ theme }) => {
             {/* <SettingsInput /> */}
             <InputMask
               mask="99:99"
-              value={breakTime}
+              value={breakValue}
               disabled={false}
-              maskPlaceholder={breakTime}
-              onChange={breakHanlder}
+              maskPlaceholder={breakValue}
+              onChange={breakHandler}
             >
               <TextField variant="filled" />
             </InputMask>
