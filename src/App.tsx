@@ -46,12 +46,11 @@ function App() {
     let time = toSeconds(timer.minutes, timer.seconds);
     if (isPause) return;
 
-    if (time === 0) {
-      toNextPhase();
-      return;
-    }
-
     const interval = setInterval(() => {
+      if (time === 0) {
+        toNextPhase();
+        return;
+      }
       time = time > 0 ? time - 1 : 0;
       setTimer({
         minutes: Math.floor(time / 60),

@@ -29,6 +29,7 @@ const SettingsModal: FC<ModalProps> = ({ theme }) => {
   }, [checked]);
 
   const breakHanlder = (e: any) => {
+    // any!!!
     console.log(e.target.value);
     setBreakTime(e.target.value);
   };
