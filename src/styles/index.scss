@@ -1,0 +1,50 @@
+@import './fonts.scss';
+
+html {
+  font-size: 10px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 1.4rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 100%;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+h1, h2, h3, 
+li, p, span {
+  line-height: 100%;
+}
+
+ul,
+ul li {
+  margin:0;
+  padding: 0;
+  text-indent: 0;
+  list-style-type: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+.container {
+  margin: 0 auto;
+  max-width: 144rem;
+  padding: 0 2rem;
+}
