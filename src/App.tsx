@@ -32,15 +32,25 @@ const breakSettings = {
 const settings = [focusSettings, breakSettings, focusSettings, breakSettings, focusSettings];
 
 function App() {
-  const { mode } = useAppSelector((state) => state.theme);
+  const { mode, focusLength, breakLength } = useAppSelector((state) => state.theme);
   const [timer, setTimer] = useState({ ...settings[0].time });
   const [isPause, setIsPause] = useState<boolean>(true);
   const [phase, setPhase] = useState(0);
   const formatedTime = useMemo(() => formatTime(timer), [timer]);
   const theme = useMemo(() => createTheme(settings[phase].theme(mode)), [mode, phase]);
 
+  console.log(focusLength);
+
+  useEffect(() => {
+    breakSettings.time = { ...breakLength };
+  }, [breakLength]);
+
+  useEffect(() => {
+    focusSettings.time = { ...focusLength };
+  }, [focusLength]);
+
   // console.log(timer, `phase = ${phase}`);
-  console.log(theme);
+  console.log(focusLength);
 
   useEffect(() => {
     let time = toSeconds(timer.minutes, timer.seconds);
@@ -189,7 +199,6 @@ export default App;
 // const formatedTime = formatTime(timer);
 
 // Todo
-// 1.show time when 00:00
 // 2. Chip Icon
 // 3. input mask
 // 4. bttn hovers

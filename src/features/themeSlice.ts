@@ -28,12 +28,16 @@ export const themeSlice = createSlice({
       console.log(action, 'test');
       state.mode = action.payload;
     },
-    setFocusLength: (state, action: any) => {
+    setFocusLength: (state, action: PayloadAction<Time>) => {
       // change any
-      state.focusLength = action;
+      state.focusLength = action.payload;
+    },
+    setBreakLength: (state, action: PayloadAction<Time>) => {
+      // change any
+      state.breakLength = action.payload;
     },
   },
 });
 
-export const { setTheme } = themeSlice.actions;
+export const { setTheme, setFocusLength, setBreakLength } = themeSlice.actions;
 export default themeSlice.reducer;

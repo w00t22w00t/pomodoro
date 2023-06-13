@@ -7,9 +7,10 @@ import { IconButton } from '@mui/material';
 import ControlledSwitch from './ControlledSwitch'; // https://mui.com/material-ui/react-switch/
 import SettingsInput from './SettingsInput';
 import { useAppDispatch } from './../hook';
-import { setTheme } from '../features/themeSlice';
+import { setTheme, setFocusLength, setBreakLength } from '../features/themeSlice';
 import { Theme } from '@mui/material/styles';
 import InputMask from 'react-input-mask';
+import { Time } from '../types';
 
 interface ModalProps {
   theme: Theme;
@@ -18,6 +19,8 @@ interface ModalProps {
 const SettingsModal: FC<ModalProps> = ({ theme }) => {
   const dispatch = useAppDispatch();
   const [checked, setChecked] = useState(true);
+  const [focusTime, setFocusTime] = useState('01:00');
+
   const [breakTime, setBreakTime] = useState('01:00');
 
   const [open, setOpen] = useState(false);
@@ -28,10 +31,24 @@ const SettingsModal: FC<ModalProps> = ({ theme }) => {
     dispatch(setTheme(checked ? 'light' : 'dark'));
   }, [checked]);
 
+  const focusHanlder = (e: any) => {
+    // any!!!
+    setFocusTime(e.target.value);
+    const time: Time = {
+      minutes: +e.target.value.split(':')[0],
+      seconds: +e.target.value.split(':')[1],
+    };
+    dispatch(setFocusLength({ ...time }));
+  };
+
   const breakHanlder = (e: any) => {
     // any!!!
-    console.log(e.target.value);
     setBreakTime(e.target.value);
+    const time: Time = {
+      minutes: +e.target.value.split(':')[0],
+      seconds: +e.target.value.split(':')[1],
+    };
+    dispatch(setBreakLength({ ...time }));
   };
 
   const style = {
@@ -78,15 +95,29 @@ const SettingsModal: FC<ModalProps> = ({ theme }) => {
             <Typography variant="body1" component="p">
               Focus length
             </Typography>
-            <SettingsInput />
+            <InputMask
+              mask="99:99"
+              value={focusTime}
+              disabled={false}
+              maskPlaceholder={focusTime}
+              onChange={focusHanlder}
+            >
+              <TextField variant="filled" />
+            </InputMask>
           </Box>
           <Box sx={rowItem}>
             <Typography variant="body1" component="p">
               Short break length
             </Typography>
             {/* <SettingsInput /> */}
-            <InputMask mask="99:99" value={breakTime} disabled={false} maskPlaceholder="" onChange={breakHanlder}>
-              <TextField />
+            <InputMask
+              mask="99:99"
+              value={breakTime}
+              disabled={false}
+              maskPlaceholder={breakTime}
+              onChange={breakHanlder}
+            >
+              <TextField variant="filled" />
             </InputMask>
           </Box>
           <Box sx={rowItem}>
