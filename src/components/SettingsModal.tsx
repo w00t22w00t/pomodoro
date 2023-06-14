@@ -1,16 +1,16 @@
 import { Box, Button, TextField, Typography } from '@mui/material';
-import React, { useState, useEffect, FC } from 'react';
+import React, { useState, useEffect, FC, useMemo } from 'react';
 import Modal from '@mui/material/Modal';
 import DotesIcon from '../UI/Icons/DotesIcon';
 import CloseIcon from '@mui/icons-material/Close';
 import { IconButton } from '@mui/material';
 import ControlledSwitch from './ControlledSwitch'; // https://mui.com/material-ui/react-switch/
 import SettingsInput from './SettingsInput';
-import { useAppDispatch } from './../hook';
+import { useAppDispatch, useAppSelector } from './../hook';
 import { setTheme, setFocusLength, setBreakLength } from '../features/themeSlice';
 import { Theme } from '@mui/material/styles';
 import InputMask from 'react-input-mask';
-import { Time } from '../types';
+import { formatTime } from '../formatter';
 
 interface ModalProps {
   theme: Theme;
@@ -18,37 +18,42 @@ interface ModalProps {
 
 const SettingsModal: FC<ModalProps> = ({ theme }) => {
   const dispatch = useAppDispatch();
+  const { focusLength, breakLength } = useAppSelector((state) => state.theme);
+  const focusFormatedTime = useMemo(() => formatTime(focusLength), [focusLength]);
+  const breakFormatedTime = useMemo(() => formatTime(breakLength), [breakLength]);
+  const [focusTime, setFocusTime] = useState(`${focusFormatedTime.minutes}:${focusFormatedTime.seconds}`); // change to default value
+  const [breakTime, setBreakTime] = useState(`${breakFormatedTime.minutes}:${breakFormatedTime.seconds}`);
   const [checked, setChecked] = useState(true);
-  const [focusTime, setFocusTime] = useState('01:00');
-
-  const [breakTime, setBreakTime] = useState('01:00');
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    dispatch(
+      setFocusLength({
+        minutes: +focusTime.split(':')[0],
+        seconds: +focusTime.split(':')[1],
+      }),
+    );
+
+    dispatch(
+      setBreakLength({
+        minutes: +breakTime.split(':')[0],
+        seconds: +breakTime.split(':')[1],
+      }),
+    );
+    setOpen(false);
+  };
 
   useEffect(() => {
     dispatch(setTheme(checked ? 'light' : 'dark'));
   }, [checked]);
 
-  const focusHanlder = (e: any) => {
-    // any!!!
+  const focusHanlder = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFocusTime(e.target.value);
-    const time: Time = {
-      minutes: +e.target.value.split(':')[0],
-      seconds: +e.target.value.split(':')[1],
-    };
-    dispatch(setFocusLength({ ...time }));
   };
 
-  const breakHanlder = (e: any) => {
-    // any!!!
+  const breakHanlder = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBreakTime(e.target.value);
-    const time: Time = {
-      minutes: +e.target.value.split(':')[0],
-      seconds: +e.target.value.split(':')[1],
-    };
-    dispatch(setBreakLength({ ...time }));
   };
 
   const style = {
@@ -120,7 +125,7 @@ const SettingsModal: FC<ModalProps> = ({ theme }) => {
               <TextField variant="filled" />
             </InputMask>
           </Box>
-          <Box sx={rowItem}>
+          {/* <Box sx={rowItem}>
             <Typography variant="body1" component="p">
               Long break length
             </Typography>
@@ -130,8 +135,8 @@ const SettingsModal: FC<ModalProps> = ({ theme }) => {
             <Typography variant="body1" component="p">
               Notifications
             </Typography>
-            {/* <ControlledSwitch /> */}
-          </Box>
+            <ControlledSwitch />
+          </Box> */}
         </Box>
       </Modal>
     </>

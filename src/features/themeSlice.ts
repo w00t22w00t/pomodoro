@@ -8,16 +8,15 @@ type stateType = {
   breakLength: Time;
 };
 
+export const defaultTime: Time = {
+  minutes: 0,
+  seconds: 10,
+};
+
 const initialState: stateType = {
   mode: 'dark',
-  focusLength: {
-    minutes: 1,
-    seconds: 0,
-  },
-  breakLength: {
-    minutes: 1,
-    seconds: 0,
-  },
+  focusLength: { ...defaultTime },
+  breakLength: { ...defaultTime },
 };
 
 export const themeSlice = createSlice({

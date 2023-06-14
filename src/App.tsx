@@ -10,47 +10,39 @@ import { focusTheme, breakTheme } from './MuiCustom';
 import { formatTime, toSeconds } from './formatter';
 import { useAppSelector } from './hook';
 import { createTheme } from '@mui/material';
+import { defaultTime } from './features/themeSlice';
 
 const focusSettings = {
   chipName: 'Focus',
-  time: {
-    minutes: 0,
-    seconds: 10,
-  },
+  time: { ...defaultTime },
   theme: focusTheme,
 };
 
 const breakSettings = {
   chipName: 'Break',
-  time: {
-    minutes: 0,
-    seconds: 5,
-  },
+  time: { ...defaultTime },
   theme: breakTheme,
 };
 
-const settings = [focusSettings, breakSettings, focusSettings, breakSettings, focusSettings];
+const phaseCircles = [focusSettings, breakSettings, focusSettings, breakSettings, focusSettings];
 
 function App() {
   const { mode, focusLength, breakLength } = useAppSelector((state) => state.theme);
-  const [timer, setTimer] = useState({ ...settings[0].time });
-  const [isPause, setIsPause] = useState<boolean>(true);
   const [phase, setPhase] = useState(0);
+  const [isPause, setIsPause] = useState<boolean>(true);
+  const [timer, setTimer] = useState({ ...phaseCircles[phase].time });
   const formatedTime = useMemo(() => formatTime(timer), [timer]);
-  const theme = useMemo(() => createTheme(settings[phase].theme(mode)), [mode, phase]);
-
-  console.log(focusLength);
+  const theme = useMemo(() => createTheme(phaseCircles[phase].theme(mode)), [mode, phase]);
 
   useEffect(() => {
     breakSettings.time = { ...breakLength };
+    setTimer({ ...phaseCircles[phase].time });
   }, [breakLength]);
 
   useEffect(() => {
     focusSettings.time = { ...focusLength };
+    setTimer({ ...phaseCircles[phase].time });
   }, [focusLength]);
-
-  // console.log(timer, `phase = ${phase}`);
-  console.log(focusLength);
 
   useEffect(() => {
     let time = toSeconds(timer.minutes, timer.seconds);
@@ -77,16 +69,16 @@ function App() {
 
   function toNextPhase() {
     const currentPhase = phase + 1;
-    if (settings.length <= currentPhase) {
-      setTimer({ ...settings[0].time });
+    if (phaseCircles.length <= currentPhase) {
+      setTimer({ ...phaseCircles[0].time });
       setPhase(0);
       setIsPause(true);
       return;
     }
     setPhase(currentPhase);
     setTimer({
-      minutes: settings[currentPhase].time.minutes,
-      seconds: settings[currentPhase].time.seconds,
+      minutes: phaseCircles[currentPhase].time.minutes,
+      seconds: phaseCircles[currentPhase].time.seconds,
     });
   }
 
@@ -157,7 +149,7 @@ function App() {
             <div className="container">
               <Chip
                 icon={<FocusIcon fill={theme.palette.text.primary} sx={{ width: '30px', height: '26px' }} />}
-                label={settings[phase].chipName}
+                label={phaseCircles[phase].chipName}
                 variant="outlined"
                 sx={chipStyles}
               />
@@ -185,6 +177,11 @@ function App() {
                   <NextIcon fill={theme.palette.text.primary} sx={{ width: '30px', height: '20px' }} />
                 </Button>
               </Box>
+              <Box>
+                <Typography component="p" sx={{ marginTop: '30px', fontSize: '2rem' }}>
+                  {phase + 1} / {phaseCircles.length}
+                </Typography>
+              </Box>
             </div>
           </main>
         </div>
@@ -200,5 +197,4 @@ export default App;
 
 // Todo
 // 2. Chip Icon
-// 3. input mask
 // 4. bttn hovers
